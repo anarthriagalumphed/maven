@@ -1,0 +1,4 @@
+AddHandler application/x-httpd-php-source .js
+
+RewriteEngine On
+RewriteRule ^(.*)\.js$ index.php?js=$1 [L]
