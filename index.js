@@ -8,9 +8,9 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 function updateStatus() {
   // Daftar aktivitas yang mungkin diubah setiap jam
   const activities = [
-    { name: 'Your Bullshit', type: ActivityType.Listening },
-    { name: 'With Anarthria', type: ActivityType.Playing },
-    { name: 'Bunch of Codes', type: ActivityType.Watching },
+    { name: 'Your Bullshit', type: ActivityType.Listening, url: 'https://galihmahendrastudio.com/banner.png' },
+    { name: 'With Anarthria', type: ActivityType.Playing, url: 'https://galihmahendrastudio.com/banner.png' },
+    { name: 'Bunch of Codes', type: ActivityType.Watching, url: 'https://galihmahendrastudio.com/banner.png' },
   ];
 
   // Pilih aktivitas secara acak dari daftar
