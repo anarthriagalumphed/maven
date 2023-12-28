@@ -1,27 +1,25 @@
-require('dotenv').config(); // Menambahkan ini untuk memuat variabel dari file .env
+require('dotenv').config();
 
 const { REST, Routes } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 
-// Mengambil nilai dari variabel di file .env
 const clientId = process.env.CLIENT_ID;
-const guildId = process.env.GUILD_ID;
 const token = process.env.TOKEN;
 
 const commands = [];
-// Grab all the command folders from the commands directory you created earlier
+
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
-	// Grab all the command files from the commands directory you created earlier
 	const commandsPath = path.join(foldersPath, folder);
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-	// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
+
 		if ('data' in command && 'execute' in command) {
 			commands.push(command.data.toJSON());
 		} else {
@@ -30,23 +28,29 @@ for (const folder of commandFolders) {
 	}
 }
 
-// Construct and prepare an instance of the REST module
 const rest = new REST().setToken(token);
 
-// and deploy your commands!
 (async () => {
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		// The put method is used to fully refresh all commands in the guild with the current set
-		const data = await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
-			{ body: commands },
+		// Ambil list guilds/bot berada
+		const guilds = await rest.get(
+			Routes.applicationGuilds(clientId)
 		);
 
-		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		// Loop untuk setiap guild
+		for (const guild of guilds) {
+			await rest.put(
+				Routes.applicationGuildCommands(clientId, guild.id),
+				{ body: commands },
+			);
+			console.log(`Successfully reloaded application (/) commands for guild ${guild.id}.`);
+		}
+
+		console.log('All guilds have been updated.');
+
 	} catch (error) {
-		// And of course, make sure you catch and log any errors!
 		console.error(error);
 	}
 })();
