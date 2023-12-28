@@ -4,7 +4,12 @@
   "description": "Mahendra Assistant for Versatile Entertainment",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "node .": "node run index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anarthriagalumphed/maven"
   },
   "author": "",
   "license": "ISC",
