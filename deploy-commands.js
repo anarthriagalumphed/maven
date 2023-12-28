@@ -1,7 +1,13 @@
+require('dotenv').config(); // Menambahkan ini untuk memuat variabel dari file .env
+
 const { REST, Routes } = require('discord.js');
-const { clientId, guildId, token } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
+
+// Mengambil nilai dari variabel di file .env
+const clientId = process.env.CLIENT_ID;
+const guildId = process.env.GUILD_ID;
+const token = process.env.TOKEN;
 
 const commands = [];
 // Grab all the command folders from the commands directory you created earlier

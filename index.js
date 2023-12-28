@@ -1,17 +1,40 @@
 // Require the necessary discord.js classes
-const { Client, Events, GatewayIntentBits,Collection } = require('discord.js');
-const { token } = require('./config.json');
-
-// Create a new client instance
+require('dotenv').config();
+const { Client, GatewayIntentBits, Collection, ActivityType, Guild } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // When the client is ready, run this code (only once).
-client.once(Events.ClientReady, readyClient => {
-  console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+// Function untuk mengubah status bot
+function updateStatus() {
+  // Daftar aktivitas yang mungkin diubah setiap jam
+  const activities = [
+    { name: 'Your Bullshit', type: ActivityType.Listening },
+    { name: 'With Anarthria', type: ActivityType.Playing },
+    { name: 'Bunch of Codes', type: ActivityType.Watching },
+  ];
+
+  // Pilih aktivitas secara acak dari daftar
+  const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+
+  // Atur aktivitas bot
+  client.user.setActivity(randomActivity.name, { type: randomActivity.type });
+}
+
+// Ketika bot sudah siap, jalankan kode ini (hanya sekali).
+client.once('ready', () => {
+  console.log(`Your bot is Launch ${client.user.tag}`);
+
+  // Pertama kali atur status
+  updateStatus();
+
+  // Setelah itu, atur status setiap jam
+  setInterval(() => {
+    updateStatus();
+  }, 3600000); // 1 jam = 3600000 milidetik
 });
 
 // Log in to Discord with your client's token
-client.login(token);
+client.login(process.env.TOKEN);
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -35,12 +58,12 @@ for (const folder of commandFolders) {
   }
 }
 
-client.on(Events.InteractionCreate, async interaction => {
-  if (!interaction.isChatInputCommand()) {
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) {
     return;
   }
 
-  const command = interaction.client.commands.get(interaction.commandName);
+  const command = client.commands.get(interaction.commandName);
 
   if (!command) {
     console.error(`No command matching ${interaction.commandName} was found.`);
