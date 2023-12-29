@@ -35,6 +35,8 @@ client.once('ready', async () => {
   // Pendaftaran perintah global
   const slashCommands = [
     { name: 'ping', description: 'Ping command' },
+    { name: 'user', description: 'User command' },
+
   ];
 
   // Filter perintah yang sudah terdaftar
