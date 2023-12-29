@@ -1,4 +1,33 @@
-client.once('ready', async () => {
+const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+// Konfigurasi dan login
+// Konfigurasi dan login
+client.login(process.env.TOKEN)
+  .catch(error => {
+    console.error(`Error during login: ${error.message}`);
+  });
+
+
+client.slashCommands = new Collection();
+
+// Fungsi untuk mengubah status bot
+function updateStatus() {
+  const activities = [
+    { name: 'Your Bullshit', type: ActivityType.Listening, url: 'https://galihmahendrastudio.com/banner.png' },
+    { name: 'With Anarthria', type: ActivityType.Playing, url: 'https://galihmahendrastudio.com/banner.png' },
+    { name: 'Bunch of Codes', type: ActivityType.Watching, url: 'https://galihmahendrastudio.com/banner.png' },
+  ];
+
+  const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+  client.user.setActivity(randomActivity.name, { type: randomActivity.type });
+}
+
+client.once('ready', () => {
   console.log(`Your bot is Launch ${client.user.tag}`);
   updateStatus();
   setInterval(() => {
@@ -10,12 +39,9 @@ client.once('ready', async () => {
     { name: 'ping', description: 'Ping command' },
   ];
 
-  // Filter perintah yang sudah terdaftar
-  const existingCommands = await client.application.commands.fetch();
-  const newCommands = slashCommands.filter(cmd => !existingCommands.has(cmd.name));
+  client.application.commands.set(slashCommands);
 
-  // Register hanya perintah yang belum terdaftar
-  client.application.commands.set(newCommands);
+  // ... (previous code)
 
   // Pendaftaran perintah lokal (dalam folder 'commands')
   const foldersPath = path.join(__dirname, 'commands');
@@ -33,7 +59,7 @@ client.once('ready', async () => {
       console.log(`Command file path: ${filePath}`);
 
       if ('data' in command && 'execute' in command) {
-        await client.application.commands.create(command.data);
+        client.application.commands.create(command.data);
         client.slashCommands.set(command.data.name, command);
       } else {
         console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
@@ -44,3 +70,30 @@ client.once('ready', async () => {
   // ... (rest of the code)
 
 });
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) {
+    return;
+  }
+
+  const command = client.slashCommands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+    } else {
+      await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
+  }
+});
+
+// (Kode lainnya bisa ditambahkan di sini)
+
