@@ -32,16 +32,17 @@ client.once('ready', async () => {
     updateStatus();
   }, 3600000);
 
+  // Hapus cache perintah sebelumnya
+  client.application.commands.cache.clear();
+
   // Pendaftaran perintah global
   const slashCommands = [
     { name: 'ping', description: 'Ping command' },
-    { name: 'user', description: 'User command' },
-
   ];
 
   // Filter perintah yang sudah terdaftar
   const existingCommands = await client.application.commands.fetch();
-  const newCommands = slashCommands.filter(cmd => !existingCommands.has(cmd.name));
+  const newCommands = slashCommands.filter(cmd => !existingCommands.some(existingCmd => existingCmd.name === cmd.name));
 
   // Register hanya perintah yang belum terdaftar
   client.application.commands.set(newCommands);
@@ -73,6 +74,7 @@ client.once('ready', async () => {
   // ... (rest of the code)
 
 });
+
 
 
 client.on('interactionCreate', async (interaction) => {
