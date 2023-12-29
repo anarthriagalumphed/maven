@@ -1,5 +1,5 @@
 // Inside your commands folder or wherever you handle commands
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('discord.js');
 
 const pingCommand = new SlashCommandBuilder()
 	.setName('ping')
