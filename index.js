@@ -36,21 +36,34 @@ client.once('ready', () => {
 
   client.application.commands.set(slashCommands);
 
+  // ... (previous code)
+
   // Pendaftaran perintah lokal (dalam folder 'commands')
-  const commandsPath = path.join(__dirname, 'commands');
-  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+  const foldersPath = path.join(__dirname, 'commands');
+  const commandFolders = fs.readdirSync(foldersPath);
 
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
+  for (const folder of commandFolders) {
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-    if ('data' in command && 'execute' in command) {
-      client.application.commands.create(command.data);
-      client.slashCommands.set(command.data.name, command);
-    } else {
-      console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      const command = require(filePath);
+
+      // Log file path for debugging
+      console.log(`Command file path: ${filePath}`);
+
+      if ('data' in command && 'execute' in command) {
+        client.application.commands.create(command.data);
+        client.slashCommands.set(command.data.name, command);
+      } else {
+        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+      }
     }
   }
+
+  // ... (rest of the code)
+
 });
 
 client.on('interactionCreate', async (interaction) => {
