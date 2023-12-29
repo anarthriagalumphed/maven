@@ -5,16 +5,26 @@ module.exports = {
 		.setName('user')
 		.setDescription('Provides information about the user.'),
 	async execute(interaction) {
-		// interaction.user is the object representing the User who ran the command
-		// interaction.member is the GuildMember object, which represents the user in the specific guild
-
-		// Get the user's joinedAt date
+		const user = interaction.user;
 		const joinedAt = interaction.member.joinedAt;
 
-		// Format the date to the user's local time
-		const localTime = joinedAt.toLocaleString();
+		// Mendapatkan nama zona waktu dari objek Date pengguna
+		const userTimeZone = user.createdAt.getTimezoneOffset();
 
-		// Reply with the formatted message
-		await interaction.reply(`This command was run by ${interaction.user.username}, who joined on ${localTime}.`);
+		// Membuat objek Date baru dengan nama zona waktu pengguna
+		const joinedAtInUserTimeZone = new Date(joinedAt.getTime() - userTimeZone * 60000);
+
+		const formattedDate = joinedAtInUserTimeZone.toLocaleString('en-US', {
+			weekday: 'short',
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+			hour: 'numeric',
+			minute: 'numeric',
+			second: 'numeric',
+			timeZoneName: 'short',
+		});
+
+		await interaction.reply(`This command was run by ${user.username}, who joined on ${formattedDate}.`);
 	},
 };
