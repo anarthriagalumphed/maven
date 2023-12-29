@@ -6,7 +6,10 @@ require('dotenv').config();
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // Konfigurasi dan login
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN)
+  .catch(error => {
+    console.error(`Error during login: ${error.message}`);
+  });
 
 client.slashCommands = new Collection();
 
@@ -22,7 +25,7 @@ function updateStatus() {
   client.user.setActivity(randomActivity.name, { type: randomActivity.type });
 }
 
-client.once('ready', () => {
+client.once('ready', async () => {
   console.log(`Your bot is Launch ${client.user.tag}`);
   updateStatus();
   setInterval(() => {
@@ -34,9 +37,12 @@ client.once('ready', () => {
     { name: 'ping', description: 'Ping command' },
   ];
 
-  client.application.commands.set(slashCommands);
+  // Filter perintah yang sudah terdaftar
+  const existingCommands = await client.application.commands.fetch();
+  const newCommands = slashCommands.filter(cmd => !existingCommands.has(cmd.name));
 
-  // ... (previous code)
+  // Register hanya perintah yang belum terdaftar
+  client.application.commands.set(newCommands);
 
   // Pendaftaran perintah lokal (dalam folder 'commands')
   const foldersPath = path.join(__dirname, 'commands');
@@ -54,7 +60,7 @@ client.once('ready', () => {
       console.log(`Command file path: ${filePath}`);
 
       if ('data' in command && 'execute' in command) {
-        client.application.commands.create(command.data);
+        await client.application.commands.create(command.data);
         client.slashCommands.set(command.data.name, command);
       } else {
         console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
@@ -65,6 +71,7 @@ client.once('ready', () => {
   // ... (rest of the code)
 
 });
+
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) {
