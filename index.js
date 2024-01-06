@@ -7,10 +7,29 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // Konfigurasi dan login
 // Konfigurasi dan login
-client.login(process.env.TOKEN)
-  .catch(error => {
-    console.error(`Error during login: ${error.message}`);
-  });
+const startTime = new Date("07:00:00"); // Waktu untuk menghidupkan bot
+const endTime = new Date("23:59:59"); // Waktu untuk mematikan bot
+
+function startBot() {
+  if (!client.isReady()) {
+    client.login(process.env.TOKEN)
+      .catch(error => {
+        console.error(`Error during login: ${error.message}`);
+      });
+  } else {
+    console.log(`Bot kembali aktif pada ${new Date().toLocaleTimeString()}`);
+  }
+}
+
+function stopBot() {
+  if (client.isReady()) {
+    client.destroy();
+    console.log(`Bot tertidur pada ${new Date().toLocaleTimeString()}`);
+  }
+}
+
+setTimeout(startBot, (startTime - new Date()) / 1000);
+setTimeout(stopBot, (endTime - new Date()) / 1000);
 
 
 client.slashCommands = new Collection();
