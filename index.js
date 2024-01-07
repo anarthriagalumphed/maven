@@ -3,13 +3,16 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-// Instantiate the client with appropriate intents
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Initialize a collection for slash commands
-client.slashCommands = new Collection();
+// Konfigurasi dan login
+// Konfigurasi dan login
+client.login(process.env.TOKEN)
+  .catch(error => {
+    console.error(`Error during login: ${error.message}`);
+  });
 
-// ... (rest of your code, including command registration and event handlers)
+
 client.slashCommands = new Collection();
 
 // Fungsi untuk mengubah status bot
@@ -92,65 +95,4 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-
-// Schedule the bot to sleep and wake using Heroku Scheduler
-if (process.env.NODE_ENV === 'production') { // Only schedule in production
-  // Create job definitions for sleep and wake actions
-  const sleepJob = {
-    id: 'bot-sleep',
-    schedule: `0 0 * * *`, // Sleep at midnight
-    command: `node worker.js sleep`,
-  };
-  const wakeJob = {
-    id: 'bot-wake',
-    schedule: `0 7 * * *`, // Wake at 7 AM
-    command: `node worker.js wake`,
-  };
-
-  // Schedule jobs using Heroku Scheduler
-  async function scheduleJob() {
-    await client.scheduler.schedule(sleepJob);
-  }
-  scheduleJob();
-
-  async function scheduleWakeJob() {
-    await client.scheduler.schedule(wakeJob);
-  }
-
-  scheduleWakeJob();
-
-
-  // Remove setTimeout code for scheduling, as it's not reliable in Heroku
-}
-
-// Handle process termination signals for graceful shutdown
-process.on('SIGINT', async () => {
-  await client.destroy();
-});
-
-process.on('SIGTERM', async () => {
-  await client.destroy();
-});
-
-// Worker.js file
-
-
-// Define sleep and wake functions
-const sleep = async () => {
-  // Put your bot to sleep here (e.g., disable message processing)
-  console.log("Bot is now sleeping...");
-
-  // Gracefully disconnect the bot from Discord
-  await client.destroy();
-};
-
-const wake = async () => {
-  // Wake your bot up here (e.g., enable message processing)
-  console.log("Bot is now awake!");
-
-  // Restart the bot client
-  await client.login(process.env.TOKEN);
-};
-
-// Export the sleep and wake functions
-module.exports = { sleep, wake };
+// (Kode lainnya bisa ditambahkan di sini)
