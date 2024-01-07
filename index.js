@@ -133,7 +133,7 @@ process.on('SIGTERM', async () => {
 });
 
 // Worker.js file
-const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
+
 
 // Define sleep and wake functions
 const sleep = async () => {
