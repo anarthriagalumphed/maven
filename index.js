@@ -108,8 +108,17 @@ if (process.env.NODE_ENV === 'production') { // Only schedule in production
   };
 
   // Schedule jobs using Heroku Scheduler
-  await client.scheduler.schedule(sleepJob);
-  await client.scheduler.schedule(wakeJob);
+  async function scheduleJob() {
+    await client.scheduler.schedule(sleepJob);
+  }
+  scheduleJob();
+
+  async function scheduleWakeJob() {
+    await client.scheduler.schedule(wakeJob);
+  }
+
+  scheduleWakeJob();
+
 
   // Remove setTimeout code for scheduling, as it's not reliable in Heroku
 }
