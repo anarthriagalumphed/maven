@@ -3,35 +3,13 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+// Instantiate the client with appropriate intents
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Konfigurasi dan login
-// Konfigurasi dan login
-const startTime = new Date("07:00:00"); // Waktu untuk menghidupkan bot
-const endTime = new Date("23:59:59"); // Waktu untuk mematikan bot
+// Initialize a collection for slash commands
+client.slashCommands = new Collection();
 
-function startBot() {
-  if (!client.isReady()) {
-    client.login(process.env.TOKEN)
-      .catch(error => {
-        console.error(`Error during login: ${error.message}`);
-      });
-  } else {
-    console.log(`Bot kembali aktif pada ${new Date().toLocaleTimeString()}`);
-  }
-}
-
-function stopBot() {
-  if (client.isReady()) {
-    client.destroy();
-    console.log(`Bot tertidur pada ${new Date().toLocaleTimeString()}`);
-  }
-}
-
-setTimeout(startBot, (startTime - new Date()) / 1000);
-setTimeout(stopBot, (endTime - new Date()) / 1000);
-
-
+// ... (rest of your code, including command registration and event handlers)
 client.slashCommands = new Collection();
 
 // Fungsi untuk mengubah status bot
@@ -114,5 +92,56 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-// (Kode lainnya bisa ditambahkan di sini)
 
+// Schedule the bot to sleep and wake using Heroku Scheduler
+if (process.env.NODE_ENV === 'production') { // Only schedule in production
+  // Create job definitions for sleep and wake actions
+  const sleepJob = {
+    id: 'bot-sleep',
+    schedule: `0 0 * * *`, // Sleep at midnight
+    command: `node worker.js sleep`,
+  };
+  const wakeJob = {
+    id: 'bot-wake',
+    schedule: `0 7 * * *`, // Wake at 7 AM
+    command: `node worker.js wake`,
+  };
+
+  // Schedule jobs using Heroku Scheduler
+  await client.scheduler.schedule(sleepJob);
+  await client.scheduler.schedule(wakeJob);
+
+  // Remove setTimeout code for scheduling, as it's not reliable in Heroku
+}
+
+// Handle process termination signals for graceful shutdown
+process.on('SIGINT', async () => {
+  await client.destroy();
+});
+
+process.on('SIGTERM', async () => {
+  await client.destroy();
+});
+
+// Worker.js file
+const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
+
+// Define sleep and wake functions
+const sleep = async () => {
+  // Put your bot to sleep here (e.g., disable message processing)
+  console.log("Bot is now sleeping...");
+
+  // Gracefully disconnect the bot from Discord
+  await client.destroy();
+};
+
+const wake = async () => {
+  // Wake your bot up here (e.g., enable message processing)
+  console.log("Bot is now awake!");
+
+  // Restart the bot client
+  await client.login(process.env.TOKEN);
+};
+
+// Export the sleep and wake functions
+module.exports = { sleep, wake };

@@ -1,9 +1,14 @@
 {
     "jobs": [
         {
-            "id": "bot-sleep",
-            "schedule": "0 0 * * *",
-            "command": "node index.js"
+            "id": "maven-bot-sleep",
+            "schedule": "0 0 * * *", 
+            "command": "node index.js sleep" 
+        },
+        {
+            "id": "maven-bot-wake",
+            "schedule": "0 7 * * *", 
+            "command": "node index.js wake" 
         }
     ]
 }
