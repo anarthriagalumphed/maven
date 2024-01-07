@@ -1,0 +1,9 @@
+{
+    "jobs": [
+        {
+            "id": "bot-sleep",
+            "schedule": "0 0 * * *",
+            "command": "node index.js"
+        }
+    ]
+}
